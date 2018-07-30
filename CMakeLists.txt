@@ -144,3 +144,7 @@ if(NOT WITH_EXAMPLES)
   message(STATUS "Add -DWITH_EXAMPLES=On to the CMake command-line to include them.")
   message(STATUS "")
 endif()
+
+
+# Include the SDL target
+add_subdirectory(sdl-cef)
