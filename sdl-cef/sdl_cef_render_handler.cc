@@ -1,25 +1,25 @@
 #include "sdl_cef_render_handler.h"
 
-RenderHandler::RenderHandler(SDL_Renderer *renderer, int w, int h) :
+SdlCefRenderHandler::SdlCefRenderHandler(SDL_Renderer *renderer, int w, int h) :
         width(w),
         height(h),
         renderer(renderer) {
     texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
 }
 
-RenderHandler::~RenderHandler() {
+SdlCefRenderHandler::~SdlCefRenderHandler() {
     if (texture) {
         SDL_DestroyTexture(texture);
     }
     renderer = nullptr;
 }
 
-bool RenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) {
+bool SdlCefRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) {
     rect = CefRect(0, 0, width, height);
     return true;
 }
 
-void RenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects,
+void SdlCefRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects,
                             const void *buffer, int w, int h) {
     if (texture) {
         unsigned char *texture_data = NULL;
@@ -31,7 +31,7 @@ void RenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type
     }
 }
 
-void RenderHandler::resize(int w, int h) {
+void SdlCefRenderHandler::resize(int w, int h) {
     if (texture) {
         SDL_DestroyTexture(texture);
     }
@@ -41,6 +41,6 @@ void RenderHandler::resize(int w, int h) {
     height = h;
 }
 
-void RenderHandler::render() {
+void SdlCefRenderHandler::render() {
     SDL_RenderCopy(renderer, texture, NULL, NULL);
 }

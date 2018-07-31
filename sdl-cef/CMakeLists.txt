@@ -15,16 +15,13 @@ include_directories(${SDL2_INCLUDE_DIR})
 
 # cefsimple sources.
 set(SDLCEF_SRCS
-        simple_app.cc
-        simple_app.h
-        simple_handler.cc
-        simple_handler.h
         sdl_cef_render_handler.cc
         sdl_cef_render_handler.h
+        sdl_cef_browser_client.cc
+        sdl_cef_browser_client.h
+        sdl_cef_main.cc
         )
 set(SDLCEF_SRCS_LINUX
-        cefsimple_linux.cc
-        simple_handler_linux.cc
         )
 set(SDLCEF_SRCS_MACOSX
         cefsimple_mac.mm
