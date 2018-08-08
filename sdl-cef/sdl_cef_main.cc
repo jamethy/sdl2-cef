@@ -7,6 +7,8 @@
 #include "include/cef_app.h"
 
 #include "SDL.h"
+#include "SDL_image.h"
+
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -32,7 +34,6 @@ CefBrowserHost::MouseButtonType translateMouseButton(SDL_MouseButtonEvent const 
 
 const int INITIAL_WINDOW_WIDTH = 800;
 const int INITIAL_WINDOW_HEIGHT = 600;
-
 
 bool handleEvent(SDL_Event &e, CefBrowser *browser, SdlCefRenderHandler *renderHandler) {
 
@@ -139,6 +140,7 @@ int main(int argc, char *argv[]) {
 
     CefSettings settings;
     settings.windowless_rendering_enabled = true;
+//    settings.background_color = 0;
 
     if (!CefInitialize(args, settings, nullptr, nullptr)) {
         return -1;
@@ -167,18 +169,23 @@ int main(int argc, char *argv[]) {
 
             {
                 CefWindowInfo window_info;
-                window_info.SetAsWindowless(0);
+//                window_info.SetTransparentPainting(true);
+                window_info.SetAsWindowless(kNullWindowHandle);
+                window_info.windowless_rendering_enabled = true;
 
                 CefBrowserSettings browserSettings;
+                browserSettings.background_color = CefColorSetARGB(0, 100, 0, 0);
 
                 browserClient = new SdlCefBrowserClient(renderHandler);
+                std::string htmlFile = "file://" + std::string(SDL_GetBasePath()) + "sdl_cef_html.html";
 
                 browser = CefBrowserHost::CreateBrowserSync(window_info, browserClient.get(),
-//                        "http://keycode.info/",
-                                                            "file:///home/james/Documents/JavaScript30/01%20-%20JavaScript%20Drum%20Kit/index-FINISHED.html",
-//                                                            "http://google.com/",
+                                                            htmlFile,
                                                             browserSettings, nullptr);
             }
+
+            std::string imgPath = std::string(SDL_GetBasePath()) + "sdl_cef_img.jpg";
+            SDL_Texture * texture = IMG_LoadTexture(renderer, imgPath.c_str());
 
             bool shutdown = false;
             while (!browserClient->closeAllowed()) {
@@ -193,8 +200,15 @@ int main(int argc, char *argv[]) {
                 // let browser process events
                 CefDoMessageLoopWork();
 
+                SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
+
                 // render
                 SDL_RenderClear(renderer);
+
+                SDL_RenderCopyEx(renderer, texture,
+                                 nullptr, nullptr,
+                                 0,
+                                 nullptr, SDL_RendererFlip::SDL_FLIP_NONE);
 
                 renderHandler->render();
 

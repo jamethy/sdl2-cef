@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="sdl_cef_css.css">
+</head>
+<body>
+
+<input />
+
+<ul id="code">
+</ul>
+
+
+<script>
+    function removeTransition(e) {
+        if (e.propertyName !== 'transform') return;
+        e.target.classList.remove('playing');
+    }
+
+    function onKeyDown(e) {
+        //console.log(e);
+
+        const { code, keyCode, which, key, altKey, charCode, ctrlKey, metaKey, shiftKey } = e;
+
+        const li = document.createElement("li");
+        li.innerHTML = JSON.stringify({
+            code, keyCode, which, key, altKey, charCode, ctrlKey, metaKey, shiftKey
+        }, null, 2);
+        document.getElementById('code').appendChild(li);
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+</script>
+
+
+</body>
+</html>

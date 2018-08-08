@@ -7,6 +7,7 @@ find_package(SDL2 REQUIRED)
 # can be found in the LICENSE file.
 
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR})
 
 #
@@ -33,6 +34,11 @@ set(SDLCEF_SRCS_WINDOWS
         cefsimple_win.cc
         resource.h
         simple_handler_win.cc
+        )
+set(SDLCEF_RESOURCE_FILES
+        sdl_cef_html.html
+        sdl_cef_css.css
+        sdl_cef_img.jpg
         )
 APPEND_PLATFORM_SOURCES(SDLCEF_SRCS)
 source_group(cefsimple FILES ${SDLCEF_SRCS})
@@ -104,7 +110,7 @@ if(OS_LINUX)
     add_executable(${SDLCEF_TARGET} ${SDLCEF_SRCS})
     SET_EXECUTABLE_TARGET_PROPERTIES(${SDLCEF_TARGET})
     add_dependencies(${SDLCEF_TARGET} libcef_dll_wrapper)
-    target_link_libraries(${SDLCEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS} ${SDL2_LIBRARY})
+    target_link_libraries(${SDLCEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS} ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY})
 
     # Set rpath so that libraries can be placed next to the executable.
     set_target_properties(${SDLCEF_TARGET} PROPERTIES INSTALL_RPATH "$ORIGIN")
@@ -114,6 +120,7 @@ if(OS_LINUX)
     # Copy binary and resource files to the target output directory.
     COPY_FILES("${SDLCEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
     COPY_FILES("${SDLCEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
+    COPY_FILES("${SDLCEF_TARGET}" "${SDLCEF_RESOURCE_FILES}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
 
     # Set SUID permissions on the chrome-sandbox target.
     SET_LINUX_SUID_PERMISSIONS("${SDLCEF_TARGET}" "${CEF_TARGET_OUT_DIR}/chrome-sandbox")

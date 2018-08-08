@@ -1,0 +1,17 @@
+html {
+    font-size: 30px;
+    background-size: cover;
+    background: transparent;
+    color: green;
+}
+body,html {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: transparent;
+}
+
+input {
+    font-size: 30px;
+}
+

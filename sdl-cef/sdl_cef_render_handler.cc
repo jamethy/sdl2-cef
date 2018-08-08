@@ -1,3 +1,5 @@
+#include <iostream>
+#include <fstream>
 #include "sdl_cef_render_handler.h"
 
 SdlCefRenderHandler::SdlCefRenderHandler(SDL_Renderer *renderer, int w, int h) :
@@ -25,7 +27,7 @@ void SdlCefRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementTyp
         unsigned char *texture_data = NULL;
         int texture_pitch = 0;
 
-        SDL_LockTexture(texture, 0, (void **) &texture_data, &texture_pitch);
+        SDL_LockTexture(texture, nullptr, (void **) &texture_data, &texture_pitch);
         memcpy(texture_data, buffer, w * h * 4);
         SDL_UnlockTexture(texture);
     }
@@ -36,11 +38,14 @@ void SdlCefRenderHandler::resize(int w, int h) {
         SDL_DestroyTexture(texture);
     }
 
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
+//    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN, SDL_TEXTUREACCESS_STREAMING, w, h);
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
     width = w;
     height = h;
 }
 
+
 void SdlCefRenderHandler::render() {
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
 }
