@@ -2,7 +2,6 @@ html {
     font-size: 30px;
     background-size: cover;
     background: transparent;
-    color: green;
 }
 body,html {
     margin: 0;
@@ -13,5 +12,69 @@ body,html {
 
 input {
     font-size: 30px;
+    width: 15em;
 }
 
+.layout {
+    display: flex;
+    flex-flow: column;
+    width: 15em;
+    margin: 0 auto 0 auto;
+    height: 100vh;
+}
+
+.spacer {
+    flex: 100;
+}
+
+.container {
+    width: 15em;
+    padding: 1em;
+    margin-left: -1em;
+    background: white;
+}
+
+.key-container {
+    display: flex;
+}
+
+.key-box {
+    flex: 1;
+    text-align: center;
+    margin: 1em;
+    border: 10px solid #B1C1DE;
+    border-radius: 0.5em;
+}
+
+.key-label {
+    background: #B1C1DE;
+    padding-top: 0.4em;
+}
+
+.mod-container {
+    display: flex;
+}
+
+.mod-box {
+    flex: 1;
+    text-align: center;
+    background: #ff980030;
+    margin: 0.3em;
+    border-radius: 0.5em;
+}
+
+.selected {
+    background: #ff9800;
+}
+
+.button-container {
+    display: flex;
+}
+
+.button {
+    flex: 1;
+    font-size: 1em;
+    margin: 1em 1em 0 1em;
+    border-radius: 0.5em;
+    outline: none;
+}

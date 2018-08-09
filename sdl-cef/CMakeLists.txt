@@ -38,7 +38,7 @@ set(SDLCEF_SRCS_WINDOWS
 set(SDLCEF_RESOURCE_FILES
         sdl_cef_html.html
         sdl_cef_css.css
-        sdl_cef_img.jpg
+        sdl_cef_img.png
         )
 APPEND_PLATFORM_SOURCES(SDLCEF_SRCS)
 source_group(cefsimple FILES ${SDLCEF_SRCS})

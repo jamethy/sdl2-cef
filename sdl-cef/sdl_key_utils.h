@@ -67,18 +67,6 @@ void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
     bool caps_lock = static_cast<bool>(event.key.keysym.mod & KMOD_CAPS);
     bool uppercase = caps_lock == !shift;
 
-    int modifiers = 0;
-    if (shift)
-        modifiers += EVENTFLAG_SHIFT_DOWN;
-    if (ctrl)
-        modifiers += EVENTFLAG_CONTROL_DOWN;
-    if (alt)
-        modifiers += EVENTFLAG_ALT_DOWN;
-    if (num_lock)
-        modifiers += EVENTFLAG_NUM_LOCK_ON;
-    if (caps_lock)
-        modifiers += EVENTFLAG_CAPS_LOCK_ON;
-
     /** Output codes **/
     int key_code = 0;
     int char_code = -1;
@@ -326,8 +314,43 @@ void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
         key_code = event.key.keysym.sym;
     }
 
+    if (event.key.state == SDL_PRESSED) {
+        /// TODO modify modifiers based on key pressed
+    }
+
+    if (event.key.state == SDL_PRESSED) {
+        switch (event.key.keysym.sym) {
+            case SDLK_LSHIFT:
+            case SDLK_RSHIFT:
+                shift = true;
+                break;
+            case SDLK_LCTRL:
+            case SDLK_RCTRL:
+                ctrl = true;
+                break;
+            case SDLK_LALT:
+            case SDLK_RALT:
+                alt = true;
+                break;
+            default:break;
+        }
+    }
+
+    int modifiers = 0;
+    if (shift)
+        modifiers += EVENTFLAG_SHIFT_DOWN;
+    if (ctrl)
+        modifiers += EVENTFLAG_CONTROL_DOWN;
+    if (alt)
+        modifiers += EVENTFLAG_ALT_DOWN;
+    if (num_lock)
+        modifiers += EVENTFLAG_NUM_LOCK_ON;
+    if (caps_lock)
+        modifiers += EVENTFLAG_CAPS_LOCK_ON;
+
     /** Fire key events to CEF **/
     if (event.key.state == SDL_PRESSED || event.type == SDL_TEXTINPUT) {
+
         // onkeydown
         CefKeyEvent key_event_key_down;
         key_event_key_down.type = KEYEVENT_KEYDOWN;

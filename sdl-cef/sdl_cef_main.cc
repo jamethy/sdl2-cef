@@ -128,6 +128,33 @@ bool handleEvent(SDL_Event &e, CefBrowser *browser, SdlCefRenderHandler *renderH
     return false;
 }
 
+void makeBackground(SDL_Window *window, SDL_Renderer *renderer, SDL_Texture *texture) {
+
+    int w = 0, h = 0;
+    SDL_GetWindowSize(window, &w, &h);
+
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> overSize(10, w / 5);
+    std::uniform_int_distribution<int> overWidth(0, w);
+    std::uniform_int_distribution<int> overHeight(0, h);
+    std::uniform_int_distribution<int> overAngle(0, 360);
+
+    for (int i = 0; i < 50; ++i) {
+
+        SDL_Rect rect;
+        rect.w = overSize(generator);
+        rect.h = rect.w;
+        rect.x = overWidth(generator);
+        rect.y = overHeight(generator);
+        int angle = overAngle(generator);
+
+        SDL_RenderCopyEx(renderer, texture,
+                         nullptr, &rect,
+                         angle,
+                         nullptr, SDL_RendererFlip::SDL_FLIP_NONE);
+    }
+}
+
 int main(int argc, char *argv[]) {
 
     // Initialize Chromium Embedded Framework
@@ -184,8 +211,9 @@ int main(int argc, char *argv[]) {
                                                             browserSettings, nullptr);
             }
 
-            std::string imgPath = std::string(SDL_GetBasePath()) + "sdl_cef_img.jpg";
-            SDL_Texture * texture = IMG_LoadTexture(renderer, imgPath.c_str());
+            std::string imgPath = std::string(SDL_GetBasePath()) + "sdl_cef_img.png";
+            SDL_Texture *texture = IMG_LoadTexture(renderer, imgPath.c_str());
+            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 
             bool shutdown = false;
             while (!browserClient->closeAllowed()) {
@@ -200,15 +228,12 @@ int main(int argc, char *argv[]) {
                 // let browser process events
                 CefDoMessageLoopWork();
 
-                SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
                 // render
                 SDL_RenderClear(renderer);
 
-                SDL_RenderCopyEx(renderer, texture,
-                                 nullptr, nullptr,
-                                 0,
-                                 nullptr, SDL_RendererFlip::SDL_FLIP_NONE);
+                makeBackground(window, renderer, texture);
 
                 renderHandler->render();
 
