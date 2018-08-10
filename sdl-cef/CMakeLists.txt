@@ -20,6 +20,8 @@ set(SDLCEF_SRCS
         sdl_cef_render_handler.h
         sdl_cef_browser_client.cc
         sdl_cef_browser_client.h
+        sdl_cef_app.cc
+        sdl_cef_app.h
         sdl_cef_main.cc
         )
 set(SDLCEF_SRCS_LINUX

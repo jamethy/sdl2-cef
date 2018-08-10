@@ -1,6 +1,7 @@
 
 #include "sdl_cef_render_handler.h"
 #include "sdl_cef_browser_client.h"
+#include "sdl_cef_app.h"
 #include "sdl_key_utils.h"
 
 #include "include/cef_browser.h"
@@ -157,19 +158,20 @@ void makeBackground(SDL_Window *window, SDL_Renderer *renderer, SDL_Texture *tex
 
 int main(int argc, char *argv[]) {
 
-    // Initialize Chromium Embedded Framework
-    // CEF needs to be initialized before SDL for some reason...
+    // This block of code is called first because CEF will call this executable
+    // to start separate processes. So anything above this point would be called multiple times.
     CefMainArgs args(argc, argv);
-    if (CefExecuteProcess(args, nullptr, nullptr) >= 0) {
-        std::cerr << "Unable to start CEF process\n";
-        return -1;
+    CefRefPtr<SdlCefApp> cefApp = new SdlCefApp();
+    int exitCode = CefExecuteProcess(args, cefApp, nullptr);
+    if (exitCode >= 0) {
+        return exitCode;
     }
 
+    // Initialize Chromium Embedded Framework
     CefSettings settings;
     settings.windowless_rendering_enabled = true;
-//    settings.background_color = 0;
 
-    if (!CefInitialize(args, settings, nullptr, nullptr)) {
+    if (!CefInitialize(args, settings, cefApp, nullptr)) {
         return -1;
     }
 
@@ -196,7 +198,6 @@ int main(int argc, char *argv[]) {
 
             {
                 CefWindowInfo window_info;
-//                window_info.SetTransparentPainting(true);
                 window_info.SetAsWindowless(kNullWindowHandle);
                 window_info.windowless_rendering_enabled = true;
 

@@ -33,8 +33,12 @@
             <span class="mod-box" id="altKey">Alt</span>
         </div>
         <div class="button-container">
-            <button class="button">Button 1</button>
-            <div id="button-count" class="button">Count 0</div>
+            <button id="js-button" class="button">JS Button</button>
+            <div id="js-value" class="button">Count 0</div>
+        </div>
+        <div class="button-container">
+            <button id="cpp-button" class="button">C++ Button</button>
+            <div id="cpp-value" class="button">Count 0</div>
         </div>
     </div>
 
@@ -72,8 +76,22 @@
     );
 
     let count = 0;
-    document.querySelector('.button').addEventListener('click', function () {
-        document.querySelector("#button-count").innerHTML = 'Count ' + (++count);
+    document.querySelector("#js-button").addEventListener('click', function () {
+        document.querySelector("#js-value").innerHTML = 'Count ' + (++count);
+    });
+
+    document.querySelector("#cpp-button").addEventListener('click', function () {
+        window.cefQuery({
+            request: JSON.stringify({requestName: "TestRequest"}), // unused
+            persistent: false,
+            onSuccess: function (response) {
+                const res = JSON.parse(response);
+                document.querySelector("#cpp-value").innerHTML = "Count " + res.count;
+            },
+            onFailure: function (error_code, error_message) {
+                document.querySelector("#cpp-value").innerHTML = error_message;
+            }
+        });
     });
 
 </script>

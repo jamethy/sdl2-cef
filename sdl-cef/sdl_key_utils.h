@@ -315,10 +315,6 @@ void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
     }
 
     if (event.key.state == SDL_PRESSED) {
-        /// TODO modify modifiers based on key pressed
-    }
-
-    if (event.key.state == SDL_PRESSED) {
         switch (event.key.keysym.sym) {
             case SDLK_LSHIFT:
             case SDLK_RSHIFT:
