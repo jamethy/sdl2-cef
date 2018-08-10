@@ -3,6 +3,7 @@
 #include "sdl_cef_browser_client.h"
 #include "sdl_cef_app.h"
 #include "sdl_key_utils.h"
+#include "stupid_background.h"
 
 #include "include/cef_browser.h"
 #include "include/cef_app.h"
@@ -33,8 +34,8 @@ CefBrowserHost::MouseButtonType translateMouseButton(SDL_MouseButtonEvent const 
     }
 }
 
-const int INITIAL_WINDOW_WIDTH = 800;
-const int INITIAL_WINDOW_HEIGHT = 600;
+const int INITIAL_WINDOW_WIDTH = 1000;
+const int INITIAL_WINDOW_HEIGHT = 2000;
 
 bool handleEvent(SDL_Event &e, CefBrowser *browser, SdlCefRenderHandler *renderHandler) {
 
@@ -64,20 +65,19 @@ bool handleEvent(SDL_Event &e, CefBrowser *browser, SdlCefRenderHandler *renderH
 
                 case SDL_WINDOWEVENT_HIDDEN:
                 case SDL_WINDOWEVENT_MINIMIZED:
-                    //browser->GetHost()->SetWindowVisibility(false);
-                    //browser->GetHost()->WasHidden(true);
+                    browser->GetHost()->WasHidden(true);
                     break;
 
                 case SDL_WINDOWEVENT_SHOWN:
                 case SDL_WINDOWEVENT_RESTORED:
-                    //browser->GetHost()->SetWindowVisibility(true);
-                    //browser->GetHost()->WasHidden(false);
+                    browser->GetHost()->WasHidden(false);
                     break;
 
                 case SDL_WINDOWEVENT_CLOSE:
                     e.type = SDL_QUIT;
                     SDL_PushEvent(&e);
                     break;
+                default:break;
             }
             break;
 
@@ -129,33 +129,6 @@ bool handleEvent(SDL_Event &e, CefBrowser *browser, SdlCefRenderHandler *renderH
     return false;
 }
 
-void makeBackground(SDL_Window *window, SDL_Renderer *renderer, SDL_Texture *texture) {
-
-    int w = 0, h = 0;
-    SDL_GetWindowSize(window, &w, &h);
-
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> overSize(10, w / 5);
-    std::uniform_int_distribution<int> overWidth(0, w);
-    std::uniform_int_distribution<int> overHeight(0, h);
-    std::uniform_int_distribution<int> overAngle(0, 360);
-
-    for (int i = 0; i < 50; ++i) {
-
-        SDL_Rect rect;
-        rect.w = overSize(generator);
-        rect.h = rect.w;
-        rect.x = overWidth(generator);
-        rect.y = overHeight(generator);
-        int angle = overAngle(generator);
-
-        SDL_RenderCopyEx(renderer, texture,
-                         nullptr, &rect,
-                         angle,
-                         nullptr, SDL_RendererFlip::SDL_FLIP_NONE);
-    }
-}
-
 int main(int argc, char *argv[]) {
 
     // CEF settings and config
@@ -202,6 +175,8 @@ int main(int argc, char *argv[]) {
 
             SDL_Event e;
 
+            StupidBackground background(50, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT, renderer);
+
             // Create the renderer handler - this takes the image buffer that CEF fills using the HTML and puts it
             // in an SDL texture
             CefRefPtr<SdlCefRenderHandler> renderHandler = new SdlCefRenderHandler(renderer,
@@ -235,6 +210,11 @@ int main(int argc, char *argv[]) {
                 // send events to browser
                 while (!shutdown && SDL_PollEvent(&e) != 0) {
                     shutdown = handleEvent(e, browser.get(), renderHandler.get());
+
+                    if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                        renderHandler->resize(e.window.data1, e.window.data2);
+                        background.resize(e.window.data1, e.window.data2);
+                    }
                 }
 
                 // let browser process events
@@ -245,8 +225,7 @@ int main(int argc, char *argv[]) {
                 // render
                 SDL_RenderClear(renderer);
 
-                makeBackground(window, renderer, texture);
-
+                background.render();
                 renderHandler->render();
 
                 // Update screen

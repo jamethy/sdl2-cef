@@ -23,6 +23,8 @@ set(SDLCEF_SRCS
         sdl_cef_app.cc
         sdl_cef_app.h
         sdl_cef_main.cc
+        stupid_background.cc
+        stupid_background.h
         )
 set(SDLCEF_SRCS_LINUX
         )
@@ -40,7 +42,7 @@ set(SDLCEF_SRCS_WINDOWS
 set(SDLCEF_RESOURCE_FILES
         sdl_cef_html.html
         sdl_cef_css.css
-        sdl_cef_img.png
+        stupid_background.png
         )
 APPEND_PLATFORM_SOURCES(SDLCEF_SRCS)
 source_group(cefsimple FILES ${SDLCEF_SRCS})
