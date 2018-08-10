@@ -314,6 +314,7 @@ void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
         key_code = event.key.keysym.sym;
     }
 
+    /** Set the modifiers **/
     if (event.key.state == SDL_PRESSED) {
         switch (event.key.keysym.sym) {
             case SDLK_LSHIFT:
@@ -333,16 +334,21 @@ void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
     }
 
     int modifiers = 0;
-    if (shift)
+    if (shift) {
         modifiers += EVENTFLAG_SHIFT_DOWN;
-    if (ctrl)
+    }
+    if (ctrl) {
         modifiers += EVENTFLAG_CONTROL_DOWN;
-    if (alt)
+    }
+    if (alt) {
         modifiers += EVENTFLAG_ALT_DOWN;
-    if (num_lock)
+    }
+    if (num_lock) {
         modifiers += EVENTFLAG_NUM_LOCK_ON;
-    if (caps_lock)
+    }
+    if (caps_lock) {
         modifiers += EVENTFLAG_CAPS_LOCK_ON;
+    }
 
     /** Fire key events to CEF **/
     if (event.key.state == SDL_PRESSED || event.type == SDL_TEXTINPUT) {
@@ -352,6 +358,7 @@ void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
         key_event_key_down.type = KEYEVENT_KEYDOWN;
         key_event_key_down.modifiers = static_cast<uint32>(modifiers);
         key_event_key_down.windows_key_code = key_code;
+        key_event_key_down.native_key_code = key_code;
         key_event_key_down.character = static_cast<char16>(char_code);
         key_event_key_down.unmodified_character = static_cast<char16>(char_code);
         browser->GetHost()->SendKeyEvent(key_event_key_down);
@@ -371,6 +378,7 @@ void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
         key_event_key_up.type = KEYEVENT_KEYUP;
         key_event_key_up.modifiers = static_cast<uint32>(modifiers);
         key_event_key_up.windows_key_code = key_code;
+        key_event_key_up.native_key_code = key_code;
         key_event_key_up.character = static_cast<char16>(char_code);
         key_event_key_up.unmodified_character = static_cast<char16>(char_code);
         browser->GetHost()->SendKeyEvent(key_event_key_up);

@@ -158,20 +158,24 @@ void makeBackground(SDL_Window *window, SDL_Renderer *renderer, SDL_Texture *tex
 
 int main(int argc, char *argv[]) {
 
+    // CEF settings and config
+    CefSettings settings;
+    settings.windowless_rendering_enabled = true;
+    CefMessageRouterConfig messageRouterConfig;
+
+    CefRefPtr<SdlCefApp> cefApp = new SdlCefApp(messageRouterConfig);
+
     // This block of code is called first because CEF will call this executable
     // to start separate processes. So anything above this point would be called multiple times.
     CefMainArgs args(argc, argv);
-    CefRefPtr<SdlCefApp> cefApp = new SdlCefApp();
     int exitCode = CefExecuteProcess(args, cefApp, nullptr);
     if (exitCode >= 0) {
         return exitCode;
     }
 
     // Initialize Chromium Embedded Framework
-    CefSettings settings;
-    settings.windowless_rendering_enabled = true;
-
     if (!CefInitialize(args, settings, cefApp, nullptr)) {
+        std::cerr << "CEF could not initialize!\n";
         return -1;
     }
 
@@ -181,36 +185,43 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    auto window = SDL_CreateWindow("Render CEF with SDL", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    // Create the SDL window to draw stuff on
+    auto window = SDL_CreateWindow("Render CEF with SDL",
+                                   SDL_WINDOWPOS_UNDEFINED,
+                                   SDL_WINDOWPOS_UNDEFINED,
                                    INITIAL_WINDOW_WIDTH,
-                                   INITIAL_WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
+                                   INITIAL_WINDOW_HEIGHT,
+                                   SDL_WINDOW_RESIZABLE);
 
     if (window) {
+
+        // Create the SDL object to render stuff with
         auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
         if (renderer) {
+
             SDL_Event e;
 
-            CefRefPtr<SdlCefRenderHandler> renderHandler = new SdlCefRenderHandler(renderer, INITIAL_WINDOW_WIDTH,
+            // Create the renderer handler - this takes the image buffer that CEF fills using the HTML and puts it
+            // in an SDL texture
+            CefRefPtr<SdlCefRenderHandler> renderHandler = new SdlCefRenderHandler(renderer,
+                                                                                   INITIAL_WINDOW_WIDTH,
                                                                                    INITIAL_WINDOW_HEIGHT);
-            // create browser-window
-            CefRefPtr<CefBrowser> browser;
-            CefRefPtr<SdlCefBrowserClient> browserClient;
 
-            {
-                CefWindowInfo window_info;
-                window_info.SetAsWindowless(kNullWindowHandle);
-                window_info.windowless_rendering_enabled = true;
+            CefRefPtr<SdlCefBrowserClient> browserClient = new SdlCefBrowserClient(renderHandler);
 
-                CefBrowserSettings browserSettings;
-                browserSettings.background_color = CefColorSetARGB(0, 100, 0, 0);
+            CefWindowInfo window_info;
+            window_info.SetAsWindowless(kNullWindowHandle);
+            window_info.windowless_rendering_enabled = true;
 
-                browserClient = new SdlCefBrowserClient(renderHandler);
-                std::string htmlFile = "file://" + std::string(SDL_GetBasePath()) + "sdl_cef_html.html";
+            CefBrowserSettings browserSettings;
+            browserSettings.background_color = 0;
 
-                browser = CefBrowserHost::CreateBrowserSync(window_info, browserClient.get(),
-                                                            htmlFile,
-                                                            browserSettings, nullptr);
-            }
+            std::string htmlFile = "file://" + std::string(SDL_GetBasePath()) + "sdl_cef_html.html";
+
+            CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(window_info, browserClient,
+                                                                              htmlFile,
+                                                                              browserSettings, nullptr);
 
             std::string imgPath = std::string(SDL_GetBasePath()) + "sdl_cef_img.png";
             SDL_Texture *texture = IMG_LoadTexture(renderer, imgPath.c_str());

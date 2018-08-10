@@ -42,17 +42,12 @@ CefRefPtr<CefLifeSpanHandler> SdlCefBrowserClient::GetLifeSpanHandler() {
     return this;
 }
 
-CefRefPtr<CefLoadHandler> SdlCefBrowserClient::GetLoadHandler() {
-    return this;
-}
-
 CefRefPtr<CefRenderHandler> SdlCefBrowserClient::GetRenderHandler() {
     return renderHandler;
 }
 
 // CefLifeSpanHandler methods.
 void SdlCefBrowserClient::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
-    // Must be executed on the UI thread.
     CEF_REQUIRE_UI_THREAD();
 
     browser_id = browser->GetIdentifier();
@@ -95,34 +90,8 @@ void SdlCefBrowserClient::OnBeforeClose(CefRefPtr<CefBrowser> browser) {
     messageRouterBrowserSide = nullptr;
 }
 
-void SdlCefBrowserClient::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode) {
-    std::cout << "OnLoadEnd(" << httpStatusCode << ")" << std::endl;
-    loaded = true;
-}
-
-bool SdlCefBrowserClient::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
-                                      CefLoadHandler::ErrorCode errorCode, const CefString &failedUrl,
-                                      CefString &errorText) {
-    std::cout << "OnLoadError()" << std::endl;
-    loaded = true;
-    return true;
-}
-
-void SdlCefBrowserClient::OnLoadingStateChange(CefRefPtr<CefBrowser> browser, bool isLoading, bool canGoBack,
-                                               bool canGoForward) {
-    std::cout << "OnLoadingStateChange()" << std::endl;
-}
-
-void SdlCefBrowserClient::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame) {
-    std::cout << "OnLoadStart()" << std::endl;
-}
-
 bool SdlCefBrowserClient::closeAllowed() const {
     return closing;
-}
-
-bool SdlCefBrowserClient::isLoaded() const {
-    return loaded;
 }
 
 bool SdlCefBrowserClient::OnBeforeBrowse(CefRefPtr<CefBrowser> browser,

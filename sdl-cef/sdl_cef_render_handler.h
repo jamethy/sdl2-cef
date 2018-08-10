@@ -8,63 +8,49 @@
 #include "SDL.h"
 #include "include/cef_render_handler.h"
 
+/**
+ * Provides the link between CEF rendering and SDL rendering. The browser object gets the size of the view from this
+ * class and then paints the HTML into a buffer which {@code OnPaint} is used to render it to a texture using SDL.
+ *
+ * This non-CefRenderHandler functions are used to handle window resizing and the actual copying of the texture to the
+ * SDL renderer.
+ */
 class SdlCefRenderHandler : public CefRenderHandler {
 public:
 
-    /**
-     *
-     * @param renderer
-     * @param w
-     * @param h
-     */
-    SdlCefRenderHandler(SDL_Renderer * renderer, int w, int h);
-
-    // destructor
+    SdlCefRenderHandler(SDL_Renderer *renderer, int initialWidth, int initialHeight);
     ~SdlCefRenderHandler() override;
 
     /**
-     * // from interface
-     * Called to retrieve the view rectangle which is relative to screen
-     * coordinates. Return true if the rectangle was provided.
+     * Resizes the texture to the new width and height
+     * Should call on resizing of window
      *
-     * @param browser /shrug
-     * @param rect Output of function
-     * @return true if successful
+     * @param width new width
+     * @param height new height
      */
-    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
+    void resize(int width, int height);
 
     /**
-     * // from interface
-     * Called when an element should be painted. Pixel values passed to this
-     * method are scaled relative to view coordinates based on the value of
-     * CefScreenInfo.device_scale_factor returned from GetScreenInfo. |type|
-     * indicates whether the element is the view or the popup widget. |buffer|
-     * contains the pixel data for the whole image. |dirtyRects| contains the set
-     * of rectangles in pixel coordinates that need to be repainted. |buffer| will
-     * be |width|*|height|*4 bytes in size and represents a BGRA image with an
-     * upper-left origin.
+     * Copies the texture to the SDL Renderer.
      *
-     * @param browser /shrug
-     * @param type /shrug
-     * @param dirtyRects /shrug
-     * @param buffer /shrug
-     * @param w /shrug
-     * @param h /shrug
+     * If you do not want it over the full screen, then view rect arguments should be added
      */
-    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects, const void * buffer, int w, int h) override;
-
-    void resize(int w, int h);
-
     void render();
 
+    // CefRenderHandler functions
+    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
+
+    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects,
+                 const void *buffer, int w, int h) override;
+
 private:
+
     int width;
     int height;
-    SDL_Renderer * renderer = nullptr;
-    SDL_Texture * texture = nullptr;
+    SDL_Renderer *renderer = nullptr;
+    SDL_Texture *texture = nullptr;
 
     IMPLEMENT_REFCOUNTING(SdlCefRenderHandler);
 };
-
 
 #endif //CEF_SDL_CEF_RENDER_HANDLER_H

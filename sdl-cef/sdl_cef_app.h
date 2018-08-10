@@ -8,32 +8,24 @@
 #include "include/cef_app.h"
 #include "include/wrapper/cef_message_router.h"
 
-class SdlCefApp : public CefApp,
-                  public CefRenderProcessHandler {
+/**
+ * For simply rendering HTML this class and the {@code CefRenderProcessHandler} implementation are unnecessary, but inserting
+ * them into the application allows for creation of functions and values in javascript.
+ *
+ * By default the functions are cefQuery and cefQueryCancel, see {@code CefMessageRouterConfig}
+ *
+ * The {@code CefApp} implementation is only there to provide access to the {@code CefRenderProcessHandler} implementation
+ */
+class SdlCefApp : public CefApp {
 public:
+
+    SdlCefApp(const CefMessageRouterConfig& config);
 
     // CefApp methods:
     CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override;
 
-    // CefRenderProcessHandler methods
-    void OnWebKitInitialized() override;
-
-    void OnContextCreated(CefRefPtr<CefBrowser> browser,
-                          CefRefPtr<CefFrame> frame,
-                          CefRefPtr<CefV8Context> context) override;
-
-    void OnContextReleased(CefRefPtr<CefBrowser> browser,
-                           CefRefPtr<CefFrame> frame,
-                           CefRefPtr<CefV8Context> context) override;
-
-    bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
-                                  CefProcessId source_process,
-                                  CefRefPtr<CefProcessMessage> message) override;
-
 private:
-
-    CefRefPtr<CefMessageRouterRendererSide> messageRouterRenderSide;
-
+    CefRefPtr<CefRenderProcessHandler> renderProcessHandler;
     IMPLEMENT_REFCOUNTING(SdlCefApp);
 };
 

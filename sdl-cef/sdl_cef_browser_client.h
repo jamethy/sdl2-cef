@@ -10,23 +10,20 @@
 #include "include/cef_life_span_handler.h"
 #include "include/internal/cef_ptr.h"
 #include "include/cef_render_handler.h"
-#include "include/cef_load_handler.h"
 #include "include/cef_client.h"
 
 // for manual render handler
 class SdlCefBrowserClient :
         public CefClient,
         public CefLifeSpanHandler,
-        public CefLoadHandler,
         public CefRequestHandler {
 public:
+
     explicit SdlCefBrowserClient(CefRefPtr<CefRenderHandler> ptr);
 
     ~SdlCefBrowserClient() override;
 
     CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
-
-    CefRefPtr<CefLoadHandler> GetLoadHandler() override;
 
     CefRefPtr<CefRenderHandler> GetRenderHandler() override;
 
@@ -41,19 +38,7 @@ public:
 
     void OnBeforeClose(CefRefPtr<CefBrowser> browser) override;
 
-    void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode) override;
-
-    bool OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefLoadHandler::ErrorCode errorCode,
-                     const CefString &failedUrl, CefString &errorText);
-
-    void
-    OnLoadingStateChange(CefRefPtr<CefBrowser> browser, bool isLoading, bool canGoBack, bool canGoForward) override;
-
-    void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame);
-
     bool closeAllowed() const;
-
-    bool isLoaded() const;
 
     // CefRequestHandler methods:
     bool OnBeforeBrowse(CefRefPtr<CefBrowser> browser,
@@ -73,7 +58,6 @@ public:
 private:
     int browser_id;
     bool closing = false;
-    bool loaded = false;
     CefRefPtr<CefRenderHandler> renderHandler;
     CefRefPtr<CefMessageRouterBrowserSide> messageRouterBrowserSide;
     CefMessageRouterBrowserSide::Handler *sampleMessageHandler;
