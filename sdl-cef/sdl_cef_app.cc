@@ -2,6 +2,12 @@
 #include <iostream>
 #include "sdl_cef_app.h"
 
+/**
+ * This class (through the CefApp impl) registers javascript functions with the CEF renderer.
+ * When the javascript functions defined by CefMessageRouterConfig are called, it passes through here and
+ * on to the SdlCefBrowserClient which manages a CefMessageRouterBrowserSide instance which sends the request
+ * to a CefMessageRouterBrowserSide::Handler implementation
+ */
 class SdlCefRenderProcessHandler : public CefRenderProcessHandler {
 public:
 

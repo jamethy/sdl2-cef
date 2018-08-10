@@ -9,6 +9,9 @@
 #include <vector>
 #include "SDL.h"
 
+/**
+ * Maybe the best thing I've ever created
+ */
 class StupidBackground {
 public:
 

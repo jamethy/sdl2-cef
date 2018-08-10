@@ -12,7 +12,10 @@
 #include "include/cef_render_handler.h"
 #include "include/cef_client.h"
 
-// for manual render handler
+/**
+ * This class serves two main functions: 1) Manages the messageRouterBrowserSide instance that handles javascript calls
+ * and 2) know when it the Cef window has closed
+ */
 class SdlCefBrowserClient :
         public CefClient,
         public CefLifeSpanHandler,
@@ -23,6 +26,9 @@ public:
 
     ~SdlCefBrowserClient() override;
 
+    bool closeAllowed() const;
+
+    // CefClient methods
     CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
 
     CefRefPtr<CefRenderHandler> GetRenderHandler() override;
@@ -37,8 +43,6 @@ public:
     bool DoClose(CefRefPtr<CefBrowser> browser) override;
 
     void OnBeforeClose(CefRefPtr<CefBrowser> browser) override;
-
-    bool closeAllowed() const;
 
     // CefRequestHandler methods:
     bool OnBeforeBrowse(CefRefPtr<CefBrowser> browser,

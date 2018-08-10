@@ -4,6 +4,10 @@
 
 #include "sdl_cef_browser_client.h"
 
+/**
+ * This class is the last step in receiving function calls from javascript (after SdlCefRenderProcessHandler and
+ * SdlCefBrowserClient message router managers).
+ */
 class SampleMessageHandler : public CefMessageRouterBrowserSide::Handler {
 
 public:
@@ -34,7 +38,6 @@ private:
 SdlCefBrowserClient::SdlCefBrowserClient(CefRefPtr<CefRenderHandler> ptr) :
         renderHandler(ptr) {
 }
-
 
 SdlCefBrowserClient::~SdlCefBrowserClient() = default;
 

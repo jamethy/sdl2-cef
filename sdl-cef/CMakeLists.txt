@@ -22,6 +22,8 @@ set(SDLCEF_SRCS
         sdl_cef_browser_client.h
         sdl_cef_app.cc
         sdl_cef_app.h
+        sdl_cef_events.h
+        sdl_cef_events.cc
         sdl_cef_main.cc
         stupid_background.cc
         stupid_background.h

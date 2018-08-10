@@ -3,7 +3,7 @@
 
 #include <SDL_image.h>
 
-StupidBackground::StupidBackground(int count, int viewWidth, int viewHeight, SDL_Renderer* renderer)
+StupidBackground::StupidBackground(int count, int viewWidth, int viewHeight, SDL_Renderer *renderer)
         : count(count),
           viewWidth(viewWidth),
           viewHeight(viewHeight),

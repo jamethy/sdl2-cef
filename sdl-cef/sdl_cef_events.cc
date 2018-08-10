@@ -1,62 +1,18 @@
-#ifndef _KEYBOARD_UTILS_H_
-#define _KEYBOARD_UTILS_H_
+#include "sdl_cef_events.h"
 
-#include "include/internal/cef_types.h"
-#include "include/cef_browser.h"
-
-#include "SDL.h"
-
-#include <iostream>
-
-#define JSK_NUM5_SECOND    12
-#define JSK_PAGE_UP        33
-#define JSK_PAGE_DOWN      34
-#define JSK_END            35
-#define JSK_HOME           36
-#define JSK_LEFT_ARROW     37
-#define JSK_UP_ARROW       38
-#define JSK_RIGHT_ARROW    39
-#define JSK_DOWN_ARROW     40
-#define JSK_INSERT         45
-#define JSK_DELETE         46
-#define JSK_SELECT         93
-#define JSK_MULTIPLY      106
-#define JSK_ADD           107
-#define JSK_SUBTRACT      109
-#define JSK_DECIMAL_POINT 110
-#define JSK_DIVIDE        111
-#define JSK_NUM_LOCK      144
-#define JSK_SCROLL_LOCK   145
-#define JSC_NUM_MULTIPLY   42
-#define JSC_NUM_ADD        43
-#define JSC_NUM_SUBTRACT   45
-#define JSC_NUM_DIVIDE     47
-#define JSC_DELETE        127
-
-#define _SDLK_KP0         1073741912
-#define _SDLK_KP1         1073741913
-#define _SDLK_KP2         1073741914
-#define _SDLK_KP3         1073741915
-#define _SDLK_KP4         1073741916
-#define _SDLK_KP5         1073741917
-#define _SDLK_KP6         1073741918
-#define _SDLK_KP7         1073741919
-#define _SDLK_KP8         1073741920
-#define _SDLK_KP9         1073741921
-#define _SDLK_SCROLL_LOCK 1073741895
-#define _SDLK_INSERT      1073741897
-#define _SDLK_HOME        1073741898
-#define _SDLK_PAGEUP      1073741899
-#define _SDLK_END         1073741901
-#define _SDLK_PAGEDOWN    1073741902
-#define _SDLK_NUM         1073741907
-#define _SDLK_NUM_DIVIDE  1073741908
-#define _SDLK_NUM_MULTIPLY 1073741909
-#define _SDLK_NUM_SUBTRACT 1073741910
-#define _SDLK_NUM_ADD     1073741911
-#define _SDLK_NUM_DECIMAL 1073741923
-#define _SDLK_SELECT      1073741925
-
+CefBrowserHost::MouseButtonType translateMouseButton(SDL_MouseButtonEvent const &e) {
+    switch (e.button) {
+        case SDL_BUTTON_MIDDLE:
+            return MBT_MIDDLE;
+        case SDL_BUTTON_RIGHT:
+        case SDL_BUTTON_X2:
+            return MBT_RIGHT;
+        case SDL_BUTTON_LEFT:
+        case SDL_BUTTON_X1:
+        default:
+            return MBT_LEFT;
+    }
+}
 
 void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
     /** Modifiers **/
@@ -385,4 +341,110 @@ void handleKeyEvent(SDL_Event event, CefBrowser *browser) {
     }
 }
 
-#endif // _KEYBOARD_UTILS_H_
+void handleMouseEvent(SDL_Event &e, CefBrowser *browser) {
+
+    CefMouseEvent event;
+
+    switch (e.type) {
+        case SDL_MOUSEMOTION:
+            event.x = e.motion.x;
+            event.y = e.motion.y;
+            break;
+
+        case SDL_MOUSEBUTTONUP:
+        case SDL_MOUSEBUTTONDOWN:
+            event.x = e.button.x;
+            event.y = e.button.y;
+        default:break;
+    }
+
+    switch (e.type) {
+        case SDL_MOUSEMOTION:
+            event.x = e.motion.x;
+            event.y = e.motion.y;
+
+            browser->GetHost()->SendMouseMoveEvent(event, false);
+            break;
+
+        case SDL_MOUSEBUTTONUP:
+            event.x = e.button.x;
+            event.y = e.button.y;
+
+            browser->GetHost()->SendMouseClickEvent(event, translateMouseButton(e.button), true, 1);
+            break;
+
+        case SDL_MOUSEBUTTONDOWN:
+            event.x = e.button.x;
+            event.y = e.button.y;
+
+            browser->GetHost()->SendMouseClickEvent(event, translateMouseButton(e.button), false, 1);
+            break;
+
+        case SDL_MOUSEWHEEL: {
+            int delta_x = e.wheel.x;
+            int delta_y = e.wheel.y;
+
+            if (SDL_MOUSEWHEEL_FLIPPED == e.wheel.direction) {
+                delta_y *= -1;
+            } else {
+                delta_x *= -1;
+            }
+
+            browser->GetHost()->SendMouseWheelEvent(event, delta_x, delta_y);
+            break;
+        }
+        default:break;
+    }
+}
+
+bool handleEvent(SDL_Event &e, CefBrowser *browser) {
+    switch (e.type) {
+        case SDL_QUIT:
+            browser->GetHost()->CloseBrowser(false);
+            return true;
+
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+            handleKeyEvent(e, browser);
+            break;
+
+        case SDL_WINDOWEVENT:
+            switch (e.window.event) {
+
+                case SDL_WINDOWEVENT_FOCUS_GAINED:
+                    browser->GetHost()->SetFocus(true);
+                    break;
+
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                    browser->GetHost()->SetFocus(false);
+                    break;
+
+                case SDL_WINDOWEVENT_HIDDEN:
+                case SDL_WINDOWEVENT_MINIMIZED:
+                    browser->GetHost()->WasHidden(true);
+                    break;
+
+                case SDL_WINDOWEVENT_SHOWN:
+                case SDL_WINDOWEVENT_RESTORED:
+                    browser->GetHost()->WasHidden(false);
+                    break;
+
+                case SDL_WINDOWEVENT_CLOSE:
+                    e.type = SDL_QUIT;
+                    SDL_PushEvent(&e);
+                    break;
+                default:break;
+            }
+            break;
+        case SDL_MOUSEMOTION:
+        case SDL_MOUSEBUTTONUP:
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEWHEEL:
+            handleMouseEvent(e, browser);
+        default:
+            break;
+    }
+
+    return false;
+}
+
