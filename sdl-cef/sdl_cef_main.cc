@@ -23,13 +23,30 @@ const long MS_PER_FRAME = 1000 / 60;
 const int INITIAL_WINDOW_WIDTH = 1000;
 const int INITIAL_WINDOW_HEIGHT = 2000;
 
+/**
+ * Shorthand to clean up objects if created
+ *
+ * @param window
+ * @param renderer
+ * @param cefInitialized
+ */
+void cleanUp(SDL_Window* window = nullptr, SDL_Renderer* renderer = nullptr, bool cefInitialized = false) {
+    if (cefInitialized) {
+        CefShutdown();
+    }
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+    }
+    SDL_Quit();
+}
+
 int main(int argc, char *argv[]) {
 
     // CEF settings and config
-    CefSettings settings;
-    settings.windowless_rendering_enabled = true;
     CefMessageRouterConfig messageRouterConfig;
-
     CefRefPtr<SdlCefApp> cefApp = new SdlCefApp(messageRouterConfig);
 
     // This block of code is called first because CEF will call this executable
@@ -38,12 +55,6 @@ int main(int argc, char *argv[]) {
     int exitCode = CefExecuteProcess(args, cefApp, nullptr);
     if (exitCode >= 0) {
         return exitCode;
-    }
-
-    // Initialize Chromium Embedded Framework
-    if (!CefInitialize(args, settings, cefApp, nullptr)) {
-        std::cerr << "CEF could not initialize!\n";
-        return -1;
     }
 
     // Initialize Simple DirectMedia Layer
@@ -59,89 +70,106 @@ int main(int argc, char *argv[]) {
                                    INITIAL_WINDOW_WIDTH,
                                    INITIAL_WINDOW_HEIGHT,
                                    SDL_WINDOW_RESIZABLE);
+    if (!window) {
+        std::cerr << "SDL could not create window! SDL_Error: " << SDL_GetError() << std::endl;
+        cleanUp();
+        return -1;
+    }
 
-    if (window) {
+    // Create the SDL object to render stuff with
+    auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer) {
+        std::cerr << "SDL could not create renderer! SDL_Error: " << SDL_GetError() << std::endl;
+        cleanUp(window);
+        return -1;
+    }
 
-        // Create the SDL object to render stuff with
-        auto renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    // Initialize Chromium Embedded Framework
+    CefSettings settings;
+    settings.windowless_rendering_enabled = true;
+    if (!CefInitialize(args, settings, cefApp, nullptr)) {
+        std::cerr << "CEF could not initialize!\n";
+        cleanUp(window, renderer);
+        return -1;
+    }
 
-        if (renderer) {
+    // create moving background image for example
+    StupidBackground background(50, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT, renderer);
 
-            SDL_Event e;
+    // Create the renderer handler - this takes the image buffer that CEF fills using the HTML and puts it
+    // in an SDL texture
+    CefRefPtr<SdlCefRenderHandler> renderHandler = new SdlCefRenderHandler(renderer,
+                                                                           INITIAL_WINDOW_WIDTH,
+                                                                           INITIAL_WINDOW_HEIGHT);
 
-            StupidBackground background(50, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT, renderer);
+    // Create a browser client - this ties into the life cycle of the browser
+    CefRefPtr<SdlCefBrowserClient> browserClient = new SdlCefBrowserClient(renderHandler, messageRouterConfig);
 
-            // Create the renderer handler - this takes the image buffer that CEF fills using the HTML and puts it
-            // in an SDL texture
-            CefRefPtr<SdlCefRenderHandler> renderHandler = new SdlCefRenderHandler(renderer,
-                                                                                   INITIAL_WINDOW_WIDTH,
-                                                                                   INITIAL_WINDOW_HEIGHT);
+    // some browser settings
+    CefWindowInfo window_info;
+    window_info.SetAsWindowless(kNullWindowHandle);
 
-            // Create a browser client - this ties into the life cycle of the browser
-            CefRefPtr<SdlCefBrowserClient> browserClient = new SdlCefBrowserClient(renderHandler);
+    CefBrowserSettings browserSettings;
+    browserSettings.background_color = 0; // allows for transparency
 
-            CefWindowInfo window_info;
-            window_info.SetAsWindowless(kNullWindowHandle);
-            window_info.windowless_rendering_enabled = true;
+    // Create the browser object to interpret the HTML
+    std::string htmlFile = "file://" + std::string(SDL_GetBasePath()) + "sdl_cef_html.html";
+    CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(window_info,
+                                                                      browserClient,
+                                                                      htmlFile,
+                                                                      browserSettings,
+                                                                      nullptr);
 
-            CefBrowserSettings browserSettings;
-            browserSettings.background_color = 0;
+    while (!browserClient->closeAllowed()) {
 
-//            std::string htmlFile = "file://" + std::string(SDL_GetBasePath()) + "sdl_cef_html.html";
-            std::string htmlFile = "http://google.com";
-            CefRefPtr<CefBrowser> browser = CefBrowserHost::CreateBrowserSync(window_info, browserClient,
-                                                                              htmlFile,
-                                                                              browserSettings, nullptr);
+        // note the start time of the frame
+        auto start = steady_clock::now();
 
-            bool shutdown = false;
-            while (!browserClient->closeAllowed()) {
+        // send events to browser
+        SDL_Event e;
+        while (SDL_PollEvent(&e) != 0) {
 
-                auto start = steady_clock::now();
+            // handle quit and window resize events separately
+            if (e.type == SDL_QUIT) {
+                browser->GetHost()->CloseBrowser(false);
 
-                // send events to browser
-                while (!shutdown && SDL_PollEvent(&e) != 0) {
-                    shutdown = handleEvent(e, browser.get());
+            } else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                renderHandler->resize(e.window.data1, e.window.data2);
+                background.resize(e.window.data1, e.window.data2);
+                browser->GetHost()->WasResized();
 
-                    // handle the window resize event separately
-                    if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-                        renderHandler->resize(e.window.data1, e.window.data2);
-                        background.resize(e.window.data1, e.window.data2);
-                        browser->GetHost()->WasResized();
-                    }
-                }
-
-                // let browser process events
-                CefDoMessageLoopWork();
-
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
-                // render
-                SDL_RenderClear(renderer);
-
-                background.render();
-                renderHandler->render();
-
-                // Update screen
-                SDL_RenderPresent(renderer);
-
-                auto elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
-                if (elapsed < MS_PER_FRAME) {
-                    std::this_thread::sleep_for(milliseconds(MS_PER_FRAME - elapsed));
-                }
+            } else {
+                handleEvent(e, browser.get());
             }
+        }
 
-            // clean up
-            browser = nullptr;
-            browserClient = nullptr;
-            renderHandler = nullptr;
+        // let browser process events
+        CefDoMessageLoopWork();
 
-            CefShutdown();
-            SDL_DestroyRenderer(renderer);
+        // clear screen
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        // draw the background then the HTML
+        background.render();
+        renderHandler->render();
+
+        // Update screen
+        SDL_RenderPresent(renderer);
+
+        // make sure we're not going too fast
+        auto elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
+        if (elapsed < MS_PER_FRAME) {
+            std::this_thread::sleep_for(milliseconds(MS_PER_FRAME - elapsed));
         }
     }
 
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    // clean up
+    browser = nullptr;
+    browserClient = nullptr;
+    renderHandler = nullptr;
+
+    cleanUp(window, renderer, true);
 
     return 0;
 }

@@ -35,8 +35,9 @@ private:
     int counter = 0;
 };
 
-SdlCefBrowserClient::SdlCefBrowserClient(CefRefPtr<CefRenderHandler> ptr) :
-        renderHandler(ptr) {
+SdlCefBrowserClient::SdlCefBrowserClient(CefRefPtr<CefRenderHandler> ptr, const CefMessageRouterConfig &config) :
+        renderHandler(ptr),
+        config(config) {
 }
 
 SdlCefBrowserClient::~SdlCefBrowserClient() = default;
@@ -57,7 +58,6 @@ void SdlCefBrowserClient::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 
     if (!messageRouterBrowserSide) {
         // Create the browser-side router for query handling.
-        CefMessageRouterConfig config;
         messageRouterBrowserSide = CefMessageRouterBrowserSide::Create(config);
 
         // Register handlers with the router.

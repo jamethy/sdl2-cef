@@ -22,7 +22,7 @@ class SdlCefBrowserClient :
         public CefRequestHandler {
 public:
 
-    explicit SdlCefBrowserClient(CefRefPtr<CefRenderHandler> ptr);
+    explicit SdlCefBrowserClient(CefRefPtr<CefRenderHandler> ptr, const CefMessageRouterConfig& config);
 
     ~SdlCefBrowserClient() override;
 
@@ -65,6 +65,7 @@ private:
     CefRefPtr<CefRenderHandler> renderHandler;
     CefRefPtr<CefMessageRouterBrowserSide> messageRouterBrowserSide;
     CefMessageRouterBrowserSide::Handler *sampleMessageHandler;
+    const CefMessageRouterConfig& config;
 
 IMPLEMENT_REFCOUNTING(SdlCefBrowserClient);
 };
