@@ -23,13 +23,7 @@ const long MS_PER_FRAME = 1000 / 60;
 const int INITIAL_WINDOW_WIDTH = 1000;
 const int INITIAL_WINDOW_HEIGHT = 2000;
 
-/**
- * Shorthand to clean up objects if created
- *
- * @param window
- * @param renderer
- * @param cefInitialized
- */
+/** Shorthand to clean up objects if created */
 void cleanUp(SDL_Window* window = nullptr, SDL_Renderer* renderer = nullptr, bool cefInitialized = false) {
     if (cefInitialized) {
         CefShutdown();
@@ -52,7 +46,7 @@ int main(int argc, char *argv[]) {
     // This block of code is called first because CEF will call this executable
     // to start separate processes. So anything above this point would be called multiple times.
     CefMainArgs args(argc, argv);
-    int exitCode = CefExecuteProcess(args, cefApp, nullptr);
+    auto exitCode = CefExecuteProcess(args, cefApp, nullptr);
     if (exitCode >= 0) {
         return exitCode;
     }
@@ -119,7 +113,6 @@ int main(int argc, char *argv[]) {
                                                                       htmlFile,
                                                                       browserSettings,
                                                                       nullptr);
-
     while (!browserClient->closeAllowed()) {
 
         // note the start time of the frame

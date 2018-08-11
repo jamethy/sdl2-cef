@@ -1,7 +1,9 @@
-The [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef/) (CEF) is a simple framework for embedding Chromium-based browsers in other applications. The original repository hosts a sample project called "cef-project" that can be used as the starting point for third-party applications built using CEF.
-
 This repository has an additional sample program that combines SDL2 with CEF. Heavy influence from [this](https://github.com/gotnospirit/cef3-sdl2)
-which I couldn't get to compile. I have only tested this in linux and am 100% sure it will not compile elsewhere.
+which I couldn't get to compile and some input mapping from [this](https://gitgud.io/MahRMuk). I have only tested this in linux and am 100% sure it will not compile elsewhere.
+
+The remainder of this readme is pretty much from the CEF project repo.
+
+The [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef/) (CEF) is a simple framework for embedding Chromium-based browsers in other applications. The original repository hosts a sample project called "cef-project" that can be used as the starting point for third-party applications built using CEF.
 
 # Quick Links
 
