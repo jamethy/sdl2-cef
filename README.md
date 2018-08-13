@@ -1,5 +1,6 @@
 This repository has an additional sample program that combines SDL2 with CEF. Heavy influence from [this](https://github.com/gotnospirit/cef3-sdl2)
 which I couldn't get to compile and some input mapping from [this](https://gitgud.io/MahRMuk). I have only tested this in linux and am 100% sure it will not compile elsewhere.
+All my changes (with the exception of the top level CMakeLists.txt) are in the sdl-cef directory.
 
 The remainder of this readme is pretty much from the CEF project repo.
 

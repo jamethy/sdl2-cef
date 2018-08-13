@@ -4,6 +4,7 @@
 #include "sdl_cef_app.h"
 #include "sdl_cef_events.h"
 #include "stupid_background.h"
+#include "frame_rate_ticker.h"
 
 #include "include/cef_browser.h"
 #include "include/cef_app.h"
@@ -12,14 +13,7 @@
 #include "SDL_image.h"
 
 #include <iostream>
-#include <chrono>
-#include <thread>
 
-using std::chrono::steady_clock;
-using std::chrono::milliseconds;
-using std::chrono::duration_cast;
-
-const long MS_PER_FRAME = 1000 / 60;
 const int INITIAL_WINDOW_WIDTH = 1000;
 const int INITIAL_WINDOW_HEIGHT = 2000;
 
@@ -104,6 +98,7 @@ int main(int argc, char *argv[]) {
     window_info.SetAsWindowless(kNullWindowHandle);
 
     CefBrowserSettings browserSettings;
+    browserSettings.windowless_frame_rate = 60;
     browserSettings.background_color = 0; // allows for transparency
 
     // Create the browser object to interpret the HTML
@@ -113,10 +108,9 @@ int main(int argc, char *argv[]) {
                                                                       htmlFile,
                                                                       browserSettings,
                                                                       nullptr);
-    while (!browserClient->closeAllowed()) {
 
-        // note the start time of the frame
-        auto start = steady_clock::now();
+    FrameRateTicker ticker(120);
+    while (!browserClient->closeAllowed()) {
 
         // send events to browser
         SDL_Event e;
@@ -151,10 +145,7 @@ int main(int argc, char *argv[]) {
         SDL_RenderPresent(renderer);
 
         // make sure we're not going too fast
-        auto elapsed = duration_cast<milliseconds>(steady_clock::now() - start).count();
-        if (elapsed < MS_PER_FRAME) {
-            std::this_thread::sleep_for(milliseconds(MS_PER_FRAME - elapsed));
-        }
+        ticker.tick();
     }
 
     // clean up
