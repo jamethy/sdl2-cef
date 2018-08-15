@@ -4,6 +4,8 @@ All my changes (with the exception of the top level CMakeLists.txt) are in the s
 
 ![What the result should look like](https://raw.githubusercontent.com/jamethy/sdl2-cef/master/sdl-cef/result.gif)
 
+The above gif is what the program should look like at runtime (although at a better frame rate). There is a sample text input field, displays about which key events have been received, a button executing javascript code, and a button executing C++ code.
+
 The remainder of this readme is pretty much from the CEF project repo.
 
 The [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef/) (CEF) is a simple framework for embedding Chromium-based browsers in other applications. The original repository hosts a sample project called "cef-project" that can be used as the starting point for third-party applications built using CEF.
