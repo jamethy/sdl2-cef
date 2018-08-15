@@ -2,6 +2,8 @@ This repository has an additional sample program that combines SDL2 with CEF. He
 which I couldn't get to compile and some input mapping from [this](https://gitgud.io/MahRMuk). I have only tested this in linux and am 100% sure it will not compile elsewhere.
 All my changes (with the exception of the top level CMakeLists.txt) are in the sdl-cef directory.
 
+![What the result should look like](https://raw.githubusercontent.com/jamethy/sdl2-cef/master/sdl-cef/result.gif)
+
 The remainder of this readme is pretty much from the CEF project repo.
 
 The [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef/) (CEF) is a simple framework for embedding Chromium-based browsers in other applications. The original repository hosts a sample project called "cef-project" that can be used as the starting point for third-party applications built using CEF.
