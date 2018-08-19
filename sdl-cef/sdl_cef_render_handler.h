@@ -7,6 +7,7 @@
 
 #include "SDL.h"
 #include "include/cef_render_handler.h"
+#include <mutex>
 
 /**
  * Provides the link between CEF rendering and SDL rendering. The browser object gets the size of the view from this
@@ -47,6 +48,7 @@ private:
 
     int width;
     int height;
+    std::mutex textureLock;
     SDL_Renderer *renderer = nullptr;
     SDL_Texture *texture = nullptr;
 

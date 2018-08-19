@@ -2,7 +2,6 @@
 #include "stupid_background.h"
 
 #include <SDL_image.h>
-#include <iostream>
 
 StupidBackground::StupidBackground(int count, int viewWidth, int viewHeight, SDL_Renderer *renderer)
         : count(count),
@@ -12,11 +11,6 @@ StupidBackground::StupidBackground(int count, int viewWidth, int viewHeight, SDL
 
     std::string imgPath = std::string(SDL_GetBasePath()) + "stupid_background.png";
     texture = IMG_LoadTexture(renderer, imgPath.c_str());
-    if (texture) {
-        std::cout << "Found texture: " << imgPath << std::endl;
-    } else {
-        std::cout << "Missing texture: " << imgPath << std::endl;
-    }
 
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 

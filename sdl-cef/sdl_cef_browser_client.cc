@@ -35,8 +35,22 @@ private:
     int counter = 0;
 };
 
+/**
+ * Prevents a context menu appearing
+ */
+class NoContextMenu : public CefContextMenuHandler {
+    void OnBeforeContextMenu(CefRefPtr<CefBrowser> browser,
+                                     CefRefPtr<CefFrame> frame,
+                                     CefRefPtr<CefContextMenuParams> params,
+                                     CefRefPtr<CefMenuModel> model) override {
+        model->Clear();
+    }
+    IMPLEMENT_REFCOUNTING(NoContextMenu);
+};
+
 SdlCefBrowserClient::SdlCefBrowserClient(CefRefPtr<CefRenderHandler> ptr, const CefMessageRouterConfig &config) :
         renderHandler(ptr),
+        contextMenuHandler(new NoContextMenu),
         config(config) {
 }
 
@@ -48,6 +62,10 @@ CefRefPtr<CefLifeSpanHandler> SdlCefBrowserClient::GetLifeSpanHandler() {
 
 CefRefPtr<CefRenderHandler> SdlCefBrowserClient::GetRenderHandler() {
     return renderHandler;
+}
+
+CefRefPtr<CefContextMenuHandler> SdlCefBrowserClient::GetContextMenuHandler() {
+    return contextMenuHandler;
 }
 
 // CefLifeSpanHandler methods.

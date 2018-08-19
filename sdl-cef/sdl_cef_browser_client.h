@@ -33,6 +33,8 @@ public:
 
     CefRefPtr<CefRenderHandler> GetRenderHandler() override;
 
+    CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override;
+
     bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                   CefProcessId source_process,
                                   CefRefPtr<CefProcessMessage> message) override;
@@ -64,6 +66,7 @@ private:
     bool closing = false;
     CefRefPtr<CefRenderHandler> renderHandler;
     CefRefPtr<CefMessageRouterBrowserSide> messageRouterBrowserSide;
+    CefRefPtr<CefContextMenuHandler> contextMenuHandler;
     CefMessageRouterBrowserSide::Handler *sampleMessageHandler;
     const CefMessageRouterConfig& config;
 

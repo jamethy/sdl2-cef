@@ -15,7 +15,7 @@
 #include <iostream>
 
 const int INITIAL_WINDOW_WIDTH = 1000;
-const int INITIAL_WINDOW_HEIGHT = 2000;
+const int INITIAL_WINDOW_HEIGHT = 1000;
 
 /** Shorthand to clean up objects if created */
 void cleanUp(SDL_Window* window = nullptr, SDL_Renderer* renderer = nullptr, bool cefInitialized = false) {

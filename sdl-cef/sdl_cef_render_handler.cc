@@ -1,5 +1,3 @@
-#include <iostream>
-#include <fstream>
 #include "sdl_cef_render_handler.h"
 
 SdlCefRenderHandler::SdlCefRenderHandler(SDL_Renderer *renderer, int w, int h) :
@@ -11,9 +9,11 @@ SdlCefRenderHandler::SdlCefRenderHandler(SDL_Renderer *renderer, int w, int h) :
 }
 
 SdlCefRenderHandler::~SdlCefRenderHandler() {
+    textureLock.lock();
     if (texture) {
         SDL_DestroyTexture(texture);
     }
+    textureLock.unlock();
     renderer = nullptr;
 }
 
@@ -24,6 +24,12 @@ bool SdlCefRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &re
 
 void SdlCefRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects,
                                   const void *buffer, int w, int h) {
+
+    if (w != width || h != height) {
+        resize(w, h);
+        browser->GetHost()->WasResized();
+    }
+    textureLock.lock();
     if (texture) {
 
         unsigned char *texture_data = nullptr;
@@ -34,21 +40,30 @@ void SdlCefRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementTyp
         memcpy(texture_data, buffer, bufferSize);
         SDL_UnlockTexture(texture);
     }
+    textureLock.unlock();
 }
 
 void SdlCefRenderHandler::resize(int w, int h) {
 
+    textureLock.lock();
     if (texture) {
         SDL_DestroyTexture(texture);
     }
 
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
-    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
     width = w;
     height = h;
+
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+
+    textureLock.unlock();
 }
 
 
 void SdlCefRenderHandler::render() {
-    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+    textureLock.lock();
+    if (texture) {
+        SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+    }
+    textureLock.unlock();
 }
