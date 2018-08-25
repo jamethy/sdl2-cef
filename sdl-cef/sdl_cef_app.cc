@@ -1,6 +1,8 @@
 
-#include <iostream>
 #include "sdl_cef_app.h"
+
+#include <iostream>
+#include <thread>
 
 /**
  * This class (through the CefApp impl) registers javascript functions with the CEF renderer.
@@ -44,11 +46,32 @@ private:
 IMPLEMENT_REFCOUNTING(SdlCefRenderProcessHandler);
 };
 
+class SdlCefBrowserProcessHandler : public CefBrowserProcessHandler {
+
+    void OnScheduleMessagePumpWork(int64 delay_ms) override {
+//        std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
+//        CefDoMessageLoopWork();
+    }
+
+IMPLEMENT_REFCOUNTING(SdlCefBrowserProcessHandler);
+};
+
 // SdlCefApp impl
 SdlCefApp::SdlCefApp(const CefMessageRouterConfig &config)
-        : renderProcessHandler(new SdlCefRenderProcessHandler(config)) {}
+        : renderProcessHandler(new SdlCefRenderProcessHandler(config)),
+        browserProcessHandler(new SdlCefBrowserProcessHandler)
+        {}
+
+void SdlCefApp::doCefWork() {
+    CefDoMessageLoopWork();
+}
 
 CefRefPtr<CefRenderProcessHandler> SdlCefApp::GetRenderProcessHandler() {
     return renderProcessHandler;
 }
+
+CefRefPtr<CefBrowserProcessHandler> SdlCefApp::GetBrowserProcessHandler() {
+    return browserProcessHandler;
+}
+
 

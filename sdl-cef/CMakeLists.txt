@@ -27,8 +27,6 @@ set(SDLCEF_SRCS
         sdl_cef_main.cc
         stupid_background.cc
         stupid_background.h
-        frame_rate_ticker.cc
-        frame_rate_ticker.h
         )
 set(SDLCEF_SRCS_LINUX
         )

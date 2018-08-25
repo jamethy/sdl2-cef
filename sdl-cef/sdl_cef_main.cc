@@ -4,7 +4,6 @@
 #include "sdl_cef_app.h"
 #include "sdl_cef_events.h"
 #include "stupid_background.h"
-#include "frame_rate_ticker.h"
 
 #include "include/cef_browser.h"
 #include "include/cef_app.h"
@@ -75,6 +74,8 @@ int main(int argc, char *argv[]) {
     // Initialize Chromium Embedded Framework
     CefSettings settings;
     settings.windowless_rendering_enabled = true;
+    settings.multi_threaded_message_loop = false;
+    settings.external_message_pump = true;
     if (!CefInitialize(args, settings, cefApp, nullptr)) {
         std::cerr << "CEF could not initialize!\n";
         cleanUp(window, renderer);
@@ -109,7 +110,6 @@ int main(int argc, char *argv[]) {
                                                                       browserSettings,
                                                                       nullptr);
 
-    FrameRateTicker ticker(120);
     while (!browserClient->closeAllowed()) {
 
         // send events to browser
@@ -130,8 +130,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // let browser process events
-        CefDoMessageLoopWork();
+        cefApp->doCefWork();
 
         // clear screen
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -143,9 +142,6 @@ int main(int argc, char *argv[]) {
 
         // Update screen
         SDL_RenderPresent(renderer);
-
-        // make sure we're not going too fast
-        ticker.tick();
     }
 
     // clean up

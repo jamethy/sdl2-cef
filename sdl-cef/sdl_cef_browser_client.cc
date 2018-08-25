@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include "include/wrapper/cef_helpers.h"
+#include "include/cef_parser.h"
 
 #include "sdl_cef_browser_client.h"
 
@@ -20,9 +21,16 @@ public:
                  CefRefPtr<Callback> callback) override {
 
         // could parse "request" here for any information
+        // CefRefPtr<CefDictionaryValue> requestValue = CefParseJSON(request, JSON_PARSER_RFC)->GetDictionary();
 
-        callback.get()->Success("{\"count\": " + std::to_string(++counter) + "}");
+        CefRefPtr<CefDictionaryValue>result_dict = CefDictionaryValue::Create();
+        result_dict->SetInt("count", ++counter);
 
+        CefRefPtr<CefValue> value = CefValue::Create();
+        value->SetDictionary(result_dict);
+        CefString json = CefWriteJSON(value, JSON_WRITER_DEFAULT);
+
+        callback.get()->Success(json);
         return true;
     }
 

@@ -48,9 +48,10 @@ private:
 
     int width;
     int height;
-    std::mutex textureLock;
     SDL_Renderer *renderer = nullptr;
     SDL_Texture *texture = nullptr;
+    std::mutex paintingMutex;
+    std::mutex drawingMutex;
 
     IMPLEMENT_REFCOUNTING(SdlCefRenderHandler);
 };

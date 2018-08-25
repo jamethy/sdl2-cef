@@ -19,13 +19,17 @@
 class SdlCefApp : public CefApp {
 public:
 
-    SdlCefApp(const CefMessageRouterConfig& config);
+    explicit SdlCefApp(const CefMessageRouterConfig& config);
+
+    void doCefWork();
 
     // CefApp methods:
     CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override;
+    CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override;
 
 private:
     CefRefPtr<CefRenderProcessHandler> renderProcessHandler;
+    CefRefPtr<CefBrowserProcessHandler> browserProcessHandler;
     IMPLEMENT_REFCOUNTING(SdlCefApp);
 };
 
